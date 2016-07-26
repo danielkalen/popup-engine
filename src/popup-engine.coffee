@@ -1,29 +1,31 @@
 do ($=jQuery)->
 	# ==== Append Popup Overlay =================================================================================
+	popupOverlay$ = $('.popup-overlay')
 	window.popupOpen = false
-	window.appendPopup = ()->
-		$(document.body).prepend('<div class="popup-overlay"></div>') if $('.popup-overlay').length is 0
+	window.appendPopup = ()-> if popupOverlay$.length is 0
+		$(document.body).prepend('<div class="popup-overlay"></div>')
+		popupOverlay$ = $('.popup-overlay')
 	
 	appendPopup()
-	$popupOverlay = $('.popup-overlay')
 
 
 	###*
 	 * The class used by popup instances of all kinds. This includes exit intents,
 	 * quote popups, screenshot lightboxes, etc.
 	 * 
-	 * @param {object} $popup jQuery object containing the form/dom element to be inserted into the popup.
+	 * @param {object} popup$ jQuery object containing the form/dom element to be inserted into the popup.
 	 * @param {string} name  Unique name to be used as the ID of the popup.
 	###
-	@Popup = ($popup, name)->
+	@Popup = (popup$, name)->
 		@name = name or 'popup_'+Math.floor(Math.random() * 100000)
-		@form = $popup.data('Form') or $popup.children('form').data('Form')
+		@form = popup$.data('Form') or popup$.children('form').data('Form')
 		@el = $("<div class='popup' id='#{name}'><div class='popup-close'></div><div class='popup-content'></div></div>")
 		@Popup = @el # alias for dependents using the older API
 
 		isExitIntent = name.includes('exit-intent')
-		
-		@el.insertAfter $popupOverlay
+
+		appendPopup()		
+		@el.insertAfter popupOverlay$
 
 
 
@@ -36,7 +38,7 @@ do ($=jQuery)->
 				@el.removeClass('hiding');
 			, 1000
 			
-			$popupOverlay.removeClass("show belongs_to_#{@name}");
+			popupOverlay$.removeClass("show belongs_to_#{@name}");
 			$(document.body).removeClass('opened-popup');
 			popupOpen = false;
 
@@ -49,7 +51,7 @@ do ($=jQuery)->
 		###
 		@open = ()->
 			if !popupOpen or isExitIntent
-				$popupOverlay.addClass("show belongs_to_#{@name}")
+				popupOverlay$.addClass("show belongs_to_#{@name}")
 				
 				$('.popup').removeClass('show') if isExitIntent
 				
@@ -90,7 +92,7 @@ do ($=jQuery)->
 		@destroy = ()-> @el.remove()
 
 
-		@replaceWith = ($el)-> @el.children('.popup-content').html $el
+		@replaceWith = (el$)-> @el.children('.popup-content').html el$
 
 
 
@@ -106,7 +108,7 @@ do ($=jQuery)->
 
 
 		# ==== Move form into new popup =================================================================================
-		$popup.first().appendTo @el.find('.popup-content')
+		popup$.first().appendTo @el.find('.popup-content')
 
 			
 
@@ -114,7 +116,7 @@ do ($=jQuery)->
 		# ==== Event attachment =================================================================================
 		@el.children('.popup-close').on 'click', ()=> @close()
 
-		$popupOverlay.on 'click', ()->
+		popupOverlay$.on 'click', ()->
 			setTimeout ()=>
 				$(@).removeClass("show belongs_to_#{name}")
 			, 0
