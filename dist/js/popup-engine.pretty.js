@@ -4,7 +4,7 @@
   window.popupOpen = false;
   window.appendPopup = function() {
     if ($('.popup-overlay').length === 0) {
-      return $(document.documentElement).prepend('<div class="popup-overlay"></div>');
+      return $(document.body).prepend('<div class="popup-overlay"></div>');
     }
   };
   appendPopup();
@@ -38,7 +38,7 @@
         };
       })(this), 1000);
       $popupOverlay.removeClass("show belongs_to_" + this.name);
-      $(document.documentElement).removeClass('opened-popup');
+      $(document.body).removeClass('opened-popup');
       popupOpen = false;
       return this.el.trigger('closed');
     };
@@ -58,7 +58,7 @@
         } else {
           this.el.addClass('show').find('.step').first().addClass('show');
         }
-        $(document.documentElement).addClass('opened-popup');
+        $(document.body).addClass('opened-popup');
       }
       if (popupOpen && !isExitIntent) {
         log('Another popup is open.');
@@ -103,7 +103,7 @@
         };
       })(this), 0);
       $('.popup.show').removeClass('show');
-      $(document.documentElement).removeClass('opened-popup');
+      $(document.body).removeClass('opened-popup');
       return popupOpen = false;
     });
     this.Close = this.close;

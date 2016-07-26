@@ -2,7 +2,7 @@ do ($=jQuery)->
 	# ==== Append Popup Overlay =================================================================================
 	window.popupOpen = false
 	window.appendPopup = ()->
-		$(document.documentElement).prepend('<div class="popup-overlay"></div>') if $('.popup-overlay').length is 0
+		$(document.body).prepend('<div class="popup-overlay"></div>') if $('.popup-overlay').length is 0
 	
 	appendPopup()
 	$popupOverlay = $('.popup-overlay')
@@ -37,7 +37,7 @@ do ($=jQuery)->
 			, 1000
 			
 			$popupOverlay.removeClass("show belongs_to_#{@name}");
-			$(document.documentElement).removeClass('opened-popup');
+			$(document.body).removeClass('opened-popup');
 			popupOpen = false;
 
 			@el.trigger('closed');
@@ -60,7 +60,7 @@ do ($=jQuery)->
 						.find('.step').first()
 							.addClass('show')
 
-				$(document.documentElement).addClass('opened-popup');
+				$(document.body).addClass('opened-popup');
 
 			if popupOpen and !isExitIntent then log('Another popup is open.')
 			
@@ -120,7 +120,7 @@ do ($=jQuery)->
 			, 0
 
 			$('.popup.show').removeClass('show')
-			$(document.documentElement).removeClass('opened-popup')
+			$(document.body).removeClass('opened-popup')
 			
 			popupOpen = false
 			
