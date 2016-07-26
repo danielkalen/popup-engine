@@ -1,5 +1,5 @@
 {
-  "name": "popup-engine",
+  "name": "@danielkalen/popup-engine",
   "version": "1.0.2",
   "description": "Popup creation and interaction engine",
   "main": "src/popup-engine.coffee",
