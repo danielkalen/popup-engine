@@ -78,7 +78,7 @@ do ($=jQuery)->
 
 
 
-	Popup::close = ()-> unless @selfIsOpen
+	Popup::close = ()-> if @selfIsOpen
 		@el.removeClass 'show'
 			.addClass 'hiding'
 		
