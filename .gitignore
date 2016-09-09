@@ -17,3 +17,6 @@ logs/error.log
 *.log
 
 settings-db.json
+
+
+.DS_Store
