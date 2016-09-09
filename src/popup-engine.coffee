@@ -1,10 +1,8 @@
 do ($=jQuery)->
 	# ==== Append Popup Overlay =================================================================================
 	popupOverlay$ = $('.popup-overlay')
-	window.popupOpen = false
-	window.appendPopup = ()-> if popupOverlay$.length is 0
-		$(document.body).prepend('<div class="popup-overlay"></div>')
-		popupOverlay$ = $('.popup-overlay')
+	appendPopup = ()-> if popupOverlay$.length is 0
+		popupOverlay$ = $('<div class="popup-overlay"></div>').prependTo(document.body)
 	
 	appendPopup()
 
@@ -16,129 +14,144 @@ do ($=jQuery)->
 	 * @param {object} popup$ jQuery object containing the form/dom element to be inserted into the popup.
 	 * @param {string} name  Unique name to be used as the ID of the popup.
 	###
-	@Popup = (popup$, name)->
+	Popup = (popup$, name)->
 		@name = name or 'popup_'+Math.floor(Math.random() * 100000)
 		@form = popup$.data('Form') or popup$.children('form').data('Form')
 		@el = $("<div class='popup' id='#{name}'><div class='popup-close'></div><div class='popup-content'></div></div>")
-		@Popup = @el # alias for dependents using the older API
+		@options = 'closeOnEsc':true
+		@isExitIntent = name.includes 'exit-intent'
+		@selfIsOpen = false
 
-		isExitIntent = name.includes('exit-intent')
 
-		appendPopup()		
+		@appendToDOM(popup$)
+		@attachEvents()
+
+		return @instances[@name] = @
+
+
+
+
+	Popup::isOpen = false # Indicates that any popup instance is open
+	Popup::instances = {}
+
+
+
+	Popup::appendToDOM = (popup$)->
+		appendPopup()
 		@el.insertAfter popupOverlay$
 
-
-
-		###*
-		 * Closes the popup on demand and hides the overlay that belongs to @ instance.
-		###
-		@close = ()->
-			@el.addClass('hiding').removeClass('show');
-			setTimeout ()=>
-				@el.removeClass('hiding');
-			, 1000
-			
-			popupOverlay$.removeClass("show belongs_to_#{@name}");
-			$(document.body).removeClass('opened-popup');
-			popupOpen = false;
-
-			@el.trigger('closed');
-
-
-
-		###*
-		 * Opens the popup on demand only if no other popup is open (unless an exit intent needs to open).
-		###
-		@open = ()->
-			if !popupOpen or isExitIntent
-				popupOverlay$.addClass("show belongs_to_#{@name}")
-				
-				$('.popup').removeClass('show') if isExitIntent
-				
-				if @el.find('.results').hasClass 'show'
-					@el.addClass('show');
-				else
-					@el.addClass('show')
-						.find('.step').first()
-							.addClass('show')
-
-				$(document.body).addClass('opened-popup');
-
-			if popupOpen and !isExitIntent then log('Another popup is open.')
-			
-			disableExitIntents?()
-			popupOpen = true
-			
-			@el.trigger('opened')
-
-
-
-
-		###*
-		 * Resets all of the input fields inside any forms that are inside the popup and sets the
-		 * first step of the popup to visible.
-		###
-		@reset = ()->
-			@form.Restart true, true
-			@el.trigger('reset')
-
-		@restart = @reset
-
-
-
-		###*
-		 * Detroys the popup instance.
-		###
-		@destroy = ()-> @el.remove()
-
-
-		@replaceWith = (el$)-> @el.children('.popup-content').html el$
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		# ==== Move form into new popup =================================================================================
 		popup$.first().appendTo @el.find('.popup-content')
 
-			
 
 
-		# ==== Event attachment =================================================================================
+
+	Popup::attachEvents = ()->
+		# ==== X button eixt =================================================================================
 		@el.children('.popup-close').on 'click', ()=> @close()
 
-		popupOverlay$.on 'click', ()->
-			setTimeout ()=>
-				$(@).removeClass("show belongs_to_#{name}")
-			, 0
+		# ==== Overlay click exit =================================================================================
+		popupOverlay$.on "click.#{@name}", ()=>
+			setTimeout ()=> popupOverlay$.removeClass("show belongs_to_#{name}")
 
-			$('.popup.show').removeClass('show')
-			$(document.body).removeClass('opened-popup')
+			$('.popup.show').removeClass 'show'
+			$(document.body).removeClass 'opened-popup'
 			
-			popupOpen = false
+			@isOpen = false
+			@close()
+
+		
+		# ==== ESC Button exit =================================================================================
+		$(document).on "keyup.#{@name}", (event)=> if event.which is 27 and @selfIsOpen and @options.closeOnEsc
+			event.stopPropagation()
+			event.preventDefault()
+			@close()
+
+
+
+
+	Popup::detachEvents = ()->
+		popupOverlay$.off "click.#{@name}"
+		$(document).off "keyup.#{@name}"
 			
 
 
 
 
 
-		# ==== Method aliases =================================================================================
-		@Close = @close
-		@Open = @open
-		@Reset = @reset
-		@Destroy = @destroy
+	Popup::close = ()-> unless @selfIsOpen
+		@el.removeClass 'show'
+			.addClass 'hiding'
+		
+		setTimeout ()=>
+			@el.removeClass 'hiding'
+		, 1000
+		
+		popupOverlay$.removeClass "show belongs_to_#{@name}"
+		$(document.body).removeClass 'opened-popup'
+
+		@isOpen = @selfIsOpen = false
+		@el.trigger 'closed'
+
+
+	
+
+
+
+	Popup::open = ()-> if not @isOpen or @isExitIntent # Only opens if no other popups are open, unless it's an exit-intent popup
+		popupOverlay$.addClass("show belongs_to_#{@name}")
+		
+		$('.popup').removeClass('show') if @isExitIntent
+		
+		if @el.find('.results').hasClass 'show'
+			@el.addClass 'show'
+		else
+			@el.addClass 'show'
+				.find '.step'
+				.first().addClass 'show'
+
+		$(document.body).addClass('opened-popup')
+	
+		@isOpen = @selfIsOpen = true
+		@el.trigger 'opened'
 
 
 
 
-		return @
+	Popup::reset = ()-> # Resets all of the input fields inside any forms that are inside the popup and sets the first step of the popup to visible.
+		@form.Restart(true, true) if @form
+		@el.trigger 'reset'
 
+
+	Popup::destroy = ()->
+		@close()
+		@detachEvents()
+		@el.remove()
+		delete @instances[@name]
+
+
+	Popup::replaceWith = (el$)->
+		@el.children('.popup-content').html el$
+
+
+
+
+
+
+	# ==== Aliases =================================================================================
+	Popup::Open = Popup::open
+	Popup::Close = Popup::close
+	Popup::Reset = Popup::reset
+	Popup::restart = Popup::reset
+	Popup::Destroy = Popup::destroy
+
+
+
+
+
+
+
+
+
+
+
+	window.Popup = Popup
