@@ -30,7 +30,7 @@ do ($=jQuery)->
 
 
 
-
+	Popup::version = import '../.version.coffee'
 	Popup::isOpen = false # Indicates that any popup instance is open
 	Popup::instances = {}
 

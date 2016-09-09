@@ -29,6 +29,7 @@
     this.attachEvents();
     return this.instances[this.name] = this;
   };
+  Popup.prototype.version = '2.0.1';
   Popup.prototype.isOpen = false;
   Popup.prototype.instances = {};
   Popup.prototype.appendToDOM = function(popup$) {
@@ -68,7 +69,7 @@
     return $(document).off("keyup." + this.name);
   };
   Popup.prototype.close = function() {
-    if (!this.selfIsOpen) {
+    if (this.selfIsOpen) {
       this.el.removeClass('show').addClass('hiding');
       setTimeout((function(_this) {
         return function() {
