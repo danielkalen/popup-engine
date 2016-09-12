@@ -24,14 +24,14 @@
       'closeOnEsc': true
     };
     this.isExitIntent = name.includes('exit-intent');
-    this.selfIsOpen = false;
+    this.isOpen = false;
     this.appendToDOM(popup$);
     this.attachEvents();
-    return this.instances[this.name] = this;
+    return Popup.instances[this.name] = this;
   };
-  Popup.prototype.version = '2.1.0';
-  Popup.prototype.isOpen = false;
-  Popup.prototype.instances = {};
+  Popup.version = '2.1.0';
+  Popup.instances = {};
+  Popup.isOpen = false;
   Popup.prototype.appendToDOM = function(popup$) {
     appendPopup();
     this.el.insertAfter(popupOverlay$);
@@ -46,17 +46,17 @@
     popupOverlay$.on("click." + this.name, (function(_this) {
       return function() {
         setTimeout(function() {
-          return popupOverlay$.removeClass("show belongs_to_" + name);
+          return popupOverlay$.removeClass("show belongs_to_" + _this.name);
         });
         $('.popup.show').removeClass('show');
         $(document.body).removeClass('opened-popup');
-        _this.isOpen = false;
+        Popup.isOpen = false;
         return _this.close();
       };
     })(this));
     return $(document).on("keyup." + this.name, (function(_this) {
       return function(event) {
-        if (event.which === 27 && _this.selfIsOpen && _this.options.closeOnEsc) {
+        if (event.which === 27 && _this.isOpen && _this.options.closeOnEsc) {
           event.stopPropagation();
           event.preventDefault();
           return _this.close();
@@ -69,7 +69,7 @@
     return $(document).off("keyup." + this.name);
   };
   Popup.prototype.close = function() {
-    if (this.selfIsOpen) {
+    if (this.isOpen) {
       this.el.removeClass('show').addClass('hiding');
       setTimeout((function(_this) {
         return function() {
@@ -78,12 +78,12 @@
       })(this), 1000);
       popupOverlay$.removeClass("show belongs_to_" + this.name);
       $(document.body).removeClass('opened-popup');
-      this.isOpen = this.selfIsOpen = false;
+      Popup.isOpen = this.isOpen = false;
       return this.el.trigger('closed');
     }
   };
   Popup.prototype.open = function() {
-    if (!this.isOpen || this.isExitIntent) {
+    if (!Popup.isOpen || this.isExitIntent) {
       popupOverlay$.addClass("show belongs_to_" + this.name);
       if (this.isExitIntent) {
         $('.popup').removeClass('show');
@@ -94,7 +94,7 @@
         this.el.addClass('show').find('.step').first().addClass('show');
       }
       $(document.body).addClass('opened-popup');
-      this.isOpen = this.selfIsOpen = true;
+      Popup.isOpen = this.isOpen = true;
       return this.el.trigger('opened');
     }
   };
@@ -108,7 +108,7 @@
     this.close();
     this.detachEvents();
     this.el.remove();
-    return delete this.instances[this.name];
+    return delete Popup.instances[this.name];
   };
   Popup.prototype.replaceWith = function(el$) {
     return this.el.children('.popup-content').html(el$);

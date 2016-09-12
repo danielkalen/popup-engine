@@ -20,19 +20,19 @@ do ($=jQuery)->
 		@el = $("<div class='popup' id='#{name}'><div class='popup-close'></div><div class='popup-content'></div></div>")
 		@options = 'closeOnEsc':true
 		@isExitIntent = name.includes 'exit-intent'
-		@selfIsOpen = false
+		@isOpen = false
 
 
 		@appendToDOM(popup$)
 		@attachEvents()
 
-		return @instances[@name] = @
+		return Popup.instances[@name] = @
 
 
 
-	Popup::version = import '../.version.coffee'
-	Popup::isOpen = false # Indicates that any popup instance is open
-	Popup::instances = {}
+	Popup.version = import '../.version.coffee'
+	Popup.instances = {}
+	Popup.isOpen = false # Indicates that any popup instance is open
 
 
 
@@ -51,17 +51,17 @@ do ($=jQuery)->
 
 		# ==== Overlay click exit =================================================================================
 		popupOverlay$.on "click.#{@name}", ()=>
-			setTimeout ()=> popupOverlay$.removeClass("show belongs_to_#{name}")
+			setTimeout ()=> popupOverlay$.removeClass("show belongs_to_#{@name}")
 
 			$('.popup.show').removeClass 'show'
 			$(document.body).removeClass 'opened-popup'
 			
-			@isOpen = false
+			Popup.isOpen = false
 			@close()
 
 		
 		# ==== ESC Button exit =================================================================================
-		$(document).on "keyup.#{@name}", (event)=> if event.which is 27 and @selfIsOpen and @options.closeOnEsc
+		$(document).on "keyup.#{@name}", (event)=> if event.which is 27 and @isOpen and @options.closeOnEsc
 			event.stopPropagation()
 			event.preventDefault()
 			@close()
@@ -78,7 +78,7 @@ do ($=jQuery)->
 
 
 
-	Popup::close = ()-> if @selfIsOpen
+	Popup::close = ()-> if @isOpen
 		@el.removeClass 'show'
 			.addClass 'hiding'
 		
@@ -89,7 +89,7 @@ do ($=jQuery)->
 		popupOverlay$.removeClass "show belongs_to_#{@name}"
 		$(document.body).removeClass 'opened-popup'
 
-		@isOpen = @selfIsOpen = false
+		Popup.isOpen = @isOpen = false
 		@el.trigger 'closed'
 
 
@@ -97,7 +97,7 @@ do ($=jQuery)->
 
 
 
-	Popup::open = ()-> if not @isOpen or @isExitIntent # Only opens if no other popups are open, unless it's an exit-intent popup
+	Popup::open = ()-> if not Popup.isOpen or @isExitIntent # Only opens if no other popups are open, unless it's an exit-intent popup
 		popupOverlay$.addClass("show belongs_to_#{@name}")
 		
 		$('.popup').removeClass('show') if @isExitIntent
@@ -111,7 +111,7 @@ do ($=jQuery)->
 
 		$(document.body).addClass('opened-popup')
 	
-		@isOpen = @selfIsOpen = true
+		Popup.isOpen = @isOpen = true
 		@el.trigger 'opened'
 
 
@@ -126,7 +126,7 @@ do ($=jQuery)->
 		@close()
 		@detachEvents()
 		@el.remove()
-		delete @instances[@name]
+		delete Popup.instances[@name]
 
 
 	Popup::replaceWith = (el$)->
