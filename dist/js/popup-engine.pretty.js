@@ -29,7 +29,7 @@
     this.attachEvents();
     return Popup.instances[this.name] = this;
   };
-  Popup.version = '2.1.0';
+  Popup.version = '2.1.1';
   Popup.instances = {};
   Popup.isOpen = false;
   Popup.prototype.appendToDOM = function(popup$) {
