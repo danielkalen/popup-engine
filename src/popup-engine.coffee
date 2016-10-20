@@ -34,7 +34,6 @@ do ($=jQuery)->
 
 
 	Popup::appendToDOM = (popup$)->
-		appendPopup()
 		@el.prependTo(document.body)
 
 		popup$.first().appendTo @contentEl
