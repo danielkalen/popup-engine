@@ -13,14 +13,13 @@ styles =
 
 	popupContent: "
 		position: absolute;
-		left: 0;
-		right: 0;
+		left: 50%;
 		top: 50%;
-		-webkit-transform: translateY(-50%);
-		-moz-transform: translateY(-50%);
-		-ms-transform: translateY(-50%);
-		-o-transform: translateY(-50%);
-		transform: translateY(-50%);
+		-webkit-transform: translate3d(-50%, -50%, 0);
+		-moz-transform: translate3d(-50%, -50%, 0);
+		-ms-transform: translate3d(-50%, -50%, 0);
+		-o-transform: translate3d(-50%, -50%, 0);
+		transform: translate3d(-50%, -50%, 0);
 		margin: 0 auto;
 	"
 
@@ -28,6 +27,8 @@ styles =
 		position: fixed;
 		left: 0;
 		top: 0;
+		width: 100vw;
+		min-height: 100vh;
 		background-color: rgba(0,0,0,0.88);
 	"
 
