@@ -1,12 +1,6 @@
 do ($=jQuery)->
-	# ==== Append Popup Overlay =================================================================================
-	popupOverlay$ = $('.popup-overlay')
-	appendPopup = ()-> if popupOverlay$.length is 0
-		popupOverlay$ = $('<div class="popup-overlay"></div>').prependTo(document.body)
-	
-	appendPopup()
-
-
+	import _parts/styles.coffee
+	import _parts/markup.coffee
 	###*
 	 * The class used by popup instances of all kinds. This includes exit intents,
 	 * quote popups, screenshot lightboxes, etc.
@@ -17,7 +11,10 @@ do ($=jQuery)->
 	Popup = (popup$, name)->
 		@name = name or 'popup_'+Math.floor(Math.random() * 100000)
 		@form = popup$.data('Form') or popup$.children('form').data('Form')
-		@el = $("<div class='popup' id='#{name}'><div class='popup-close'></div><div class='popup-content'></div></div>")
+		@el = $(markup.popup).attr 'id', name
+		@overlayEl = $(markup.popupOverlay).appendTo(@el)
+		@closeEl = $(markup.popupClose).appendTo(@el)
+		@contentEl = $(markup.popupContent).appendTo(@el)
 		@options = 'closeOnEsc':true
 		@isExitIntent = name.includes 'exit-intent'
 		@isOpen = false
@@ -38,26 +35,16 @@ do ($=jQuery)->
 
 	Popup::appendToDOM = (popup$)->
 		appendPopup()
-		@el.insertAfter popupOverlay$
+		@el.prependTo(document.body)
 
-		popup$.first().appendTo @el.find('.popup-content')
+		popup$.first().appendTo @contentEl
 
 
 
 
 	Popup::attachEvents = ()->
-		# ==== X button eixt =================================================================================
-		@el.children('.popup-close').on 'click', ()=> @close()
-
-		# ==== Overlay click exit =================================================================================
-		popupOverlay$.on "click.#{@name}", ()=>
-			setTimeout ()=> popupOverlay$.removeClass("show belongs_to_#{@name}")
-
-			$('.popup.show').removeClass 'show'
-			$(document.body).removeClass 'opened-popup'
-			
-			Popup.isOpen = false
-			@close()
+		# ==== Overlay / X-button eixt =================================================================================
+		@closeEl.add(@overlayEl).on 'click', ()=> @close()
 
 		
 		# ==== ESC Button exit =================================================================================
@@ -70,7 +57,7 @@ do ($=jQuery)->
 
 
 	Popup::detachEvents = ()->
-		popupOverlay$.off "click.#{@name}"
+		@overlayEl.off "click.#{@name}"
 		$(document).off "keyup.#{@name}"
 			
 
@@ -81,12 +68,12 @@ do ($=jQuery)->
 	Popup::close = ()-> if @isOpen
 		@el.removeClass 'show'
 			.addClass 'hiding'
+			[0].style = styles.popup
 		
 		setTimeout ()=>
 			@el.removeClass 'hiding'
 		, 1000
 		
-		popupOverlay$.removeClass "show belongs_to_#{@name}"
 		$(document.body).removeClass 'opened-popup'
 
 		Popup.isOpen = @isOpen = false
@@ -97,9 +84,7 @@ do ($=jQuery)->
 
 
 
-	Popup::open = ()-> if not Popup.isOpen or @isExitIntent # Only opens if no other popups are open, unless it's an exit-intent popup
-		popupOverlay$.addClass("show belongs_to_#{@name}")
-		
+	Popup::open = ()-> if not Popup.isOpen or @isExitIntent # Only opens if no other popups are open, unless it's an exit-intent popup		
 		$('.popup').removeClass('show') if @isExitIntent
 		
 		if @el.find('.results').hasClass 'show'
@@ -109,6 +94,7 @@ do ($=jQuery)->
 				.find '.step'
 				.first().addClass 'show'
 
+		@el[0].style = styles.popupStateOpen
 		$(document.body).addClass('opened-popup')
 	
 		Popup.isOpen = @isOpen = true
@@ -130,7 +116,7 @@ do ($=jQuery)->
 
 
 	Popup::replaceWith = (el$)->
-		@el.children('.popup-content').html el$
+		@contentEl.html el$
 
 
 
