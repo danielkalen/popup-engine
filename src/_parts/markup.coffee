@@ -1,5 +1,6 @@
 markup = 
-	popup: "<div class='Popup' style='#{styles.popup}'></div>"
-	popupContent: "<div class='Popup-content' style='#{styles.popupContent}'></div>"
-	popupOverlay: "<div class='Popup-overlay' style='#{styles.popupOverlay}'></div>"
+	popup: "<div class='Popup'></div>"
+	popupContent: "<div class='Popup-content'></div>"
+	popupOverlay: "<div class='Popup-overlay'></div>"
 	popupClose: "<div class='Popup-close'></div>"
+	bodyWrapper: "<div class='bodyInnerwrap'></div>"

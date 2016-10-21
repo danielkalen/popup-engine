@@ -8,7 +8,7 @@
     "build": "npm run build:pretty && npm run build:ugly",
     "build:ugly": "simplyimport -i src/popup-engine.coffee | coffee -b -s -c > dist/js/popup-engine.pretty.js && uglifyjs dist/js/popup-engine.pretty.js -m -c keep_fargs,unused=false -o dist/js/popup-engine.js",
     "build:pretty": "simplyimport -i src/popup-engine.coffee | coffee -b -s -c > dist/js/popup-engine.pretty.js && cp -f dist/js/popup-engine.pretty.js dist/js/popup-engine.js",
-    "watch": "simplywatch -g 'src/**' -x 'npm run build:pretty'"
+    "watch": "simplywatch -g 'src/*' -x 'npm run build:pretty -s'"
   },
   "repository": {
     "type": "git",

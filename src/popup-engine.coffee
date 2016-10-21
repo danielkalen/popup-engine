@@ -1,26 +1,29 @@
 do ($=jQuery)->
-	import _parts/styles.coffee
 	import _parts/markup.coffee
+	import _parts/styles.coffee
+	import _parts/options.coffee
+	import _parts/helpers.coffee
 	###*
 	 * The class used by popup instances of all kinds. This includes exit intents,
 	 * quote popups, screenshot lightboxes, etc.
 	 * 
-	 * @param {object} popup$ jQuery object containing the form/dom element to be inserted into the popup.
-	 * @param {string} name  Unique name to be used as the ID of the popup.
+	 * @param {object} targetEl$  jQuery object containing the form/dom element to be inserted into the popup.
+	 * @param {string} name       Unique name to be used as the ID of the popup.
 	###
-	Popup = (popup$, name)->
+	Popup = (targetEl$, name, options)->
 		@name = name or 'popup_'+Math.floor(Math.random() * 100000)
-		@form = popup$.data('Form') or popup$.children('form').data('Form')
+		@form = targetEl$.data('Form') or targetEl$.children('form').data('Form')
+		@options = $.extend(true, {}, defaultOptions, options)
+		@isOpen = false
+		@scrollOffset = 0
+
 		@el = $(markup.popup).attr 'id', name
 		@overlayEl = $(markup.popupOverlay).appendTo(@el)
 		@closeEl = $(markup.popupClose).appendTo(@el)
 		@contentEl = $(markup.popupContent).appendTo(@el)
-		@options = 'closeOnEsc':true
-		@isExitIntent = name.includes 'exit-intent'
-		@isOpen = false
 
 
-		@appendToDOM(popup$)
+		@appendToDOM(targetEl$)
 		@attachEvents()
 
 		return Popup.instances[@name] = @
@@ -33,10 +36,26 @@ do ($=jQuery)->
 
 
 
-	Popup::appendToDOM = (popup$)->
+	Popup::appendToDOM = (targetEl$)->
+		applyStyles(@el, @options.style.popup)
+		applyStyles(@contentEl, @options.style.popupContent)
+		applyStyles(@overlayEl, @options.style.popupOverlay)
+		applyStyles(@closeEl, @options.style.popupClose or {})
 		@el.prependTo(document.body)
 
-		popup$.first().appendTo @contentEl
+		targetEl$.first().appendTo @contentEl
+	
+
+	Popup::centerPopup = ()->
+		contentHeight = @contentEl[0].clientHeight
+		windowHeight = window.innerHeight
+		
+		if contentHeight >= windowHeight-80
+			offset = if window.innerWidth > 736 then 100 else 60
+		else
+			offset = (windowHeight - contentHeight)/2
+		
+		@contentEl[0].style.margin = "#{offset}px auto"
 
 
 
@@ -52,12 +71,17 @@ do ($=jQuery)->
 			event.preventDefault()
 			@close()
 
+		# ==== Center popup fix on resize =================================================================================
+		if @options.centerPopup
+			$(window).on "resize.#{@name}", ()=> @centerPopup() if @isOpen
+
 
 
 
 	Popup::detachEvents = ()->
 		@overlayEl.off "click.#{@name}"
 		$(document).off "keyup.#{@name}"
+		$(window).off "resize.#{@name}"
 			
 
 
@@ -67,13 +91,17 @@ do ($=jQuery)->
 	Popup::close = ()-> if @isOpen
 		@el.removeClass 'show'
 			.addClass 'hiding'
-			[0].style = styles.popup
+		
+		removeStyles(@el, @options.styleOpenState.popup, @options.style.popup)
 		
 		setTimeout ()=>
 			@el.removeClass 'hiding'
-		, 1000
+			removeStyles(bodyWrapper$, @options.styleOpenState.bodyWrapper)
+
+			window.scroll(0, @scrollOffset+getDocumentOffset())
+		, 400
 		
-		$(document.body).removeClass 'opened-popup'
+		$(document.body).removeClass '_popupOpen'
 
 		Popup.isOpen = @isOpen = false
 		@el.trigger 'closed'
@@ -83,8 +111,8 @@ do ($=jQuery)->
 
 
 
-	Popup::open = ()-> if not Popup.isOpen or @isExitIntent # Only opens if no other popups are open, unless it's an exit-intent popup		
-		$('.popup').removeClass('show') if @isExitIntent
+	Popup::open = ()-> if not Popup.isOpen or @options.forceOpen # Only opens if no other popups are open, unless it's an exit-intent popup		
+		$('.popup').removeClass('show') if @options.forceOpen
 		
 		if @el.find('.results').hasClass 'show'
 			@el.addClass 'show'
@@ -93,9 +121,14 @@ do ($=jQuery)->
 				.find '.step'
 				.first().addClass 'show'
 
-		@el[0].style = styles.popupStateOpen
-		$(document.body).addClass('opened-popup')
+		@scrollOffset = getScrollOffset()
+		applyStyles(@el, @options.styleOpenState.popup)
+		applyStyles(bodyWrapper$, @options.styleOpenState.bodyWrapper, {'top': "#{0-@scrollOffset}px"})
+		
+		@centerPopup() if @options.centerPopup
+		setTimeout ()-> window.scroll(0, 0)
 	
+		$(document.body).addClass('_popupOpen')
 		Popup.isOpen = @isOpen = true
 		@el.trigger 'opened'
 
@@ -136,7 +169,10 @@ do ($=jQuery)->
 
 
 
-
-
-
+	bodyWrapper$ = $('<div></div>')
+	
+	$ ()->
+		$(document.body).wrapInner(markup.bodyWrapper)
+		bodyWrapper$ = $(document.body).children('.bodyInnerwrap')
+	
 	window.Popup = Popup
