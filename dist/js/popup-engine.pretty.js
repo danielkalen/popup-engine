@@ -65,7 +65,7 @@
   };
   getDocumentOffset = function() {
     var ref;
-    return (((ref = document.documentElement.getBoundingClientRect()) != null ? ref.top : void 0) || 0) + window.scrollY;
+    return (((ref = document.body.getBoundingClientRect()) != null ? ref.top : void 0) || 0) + window.scrollY;
   };
   applyStyles = function(el, styleObject, additional) {
     var key, value;
@@ -110,7 +110,7 @@
     this.attachEvents();
     return Popup.instances[this.name] = this;
   };
-  Popup.version = '2.2.2';
+  Popup.version = '2.2.3';
   Popup.instances = {};
   Popup.isOpen = false;
   Popup.prototype.appendToDOM = function(targetEl$) {
