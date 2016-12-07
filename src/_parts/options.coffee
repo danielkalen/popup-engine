@@ -1,6 +1,8 @@
 defaultOptions = 
+	'type': 'center'
 	'closeOnEsc': true
-	'centerPopup': true
 	'forceOpen': false
-	'style': style
-	'styleOpenState': styleOpenState
+	'closeOthers': true
+	'animation': 300
+	'styles': styles
+	'markup': markup

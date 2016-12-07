@@ -4,19 +4,31 @@ getScrollOffset = ()->
 getDocumentOffset = ()->
 	(document.body.getBoundingClientRect()?.top or 0) + window.scrollY
 
-applyStyles = (el, styleObject, additional)->
-	styleObject = $.extend {}, styleObject, additional if additional
-	
-	for key,value of styleObject
-		(el[0] or el).style[key] = value
 
-	return el
+genName = ()->
+	'popup_'+Math.floor(Math.random() * 100000)
 
 
-removeStyles = (el, styleObject, stylesToReinstate)->
-	for key of styleObject
-		(el[0] or el).style[key] = ''
 
-	applyStyles(el, stylesToReinstate) if stylesToReinstate
 
-	return el
+genTransformStyle = (value, scaleValue)->
+	scale = if scaleValue? then "scale(#{scaleValue})" else ''
+	translate = "translate3d(#{value})"
+	transformString = "#{translate} #{scale}"
+
+	webkitTransform: transformString
+	mozTransform: transformString
+	msTransform: transformString
+	oTransform: transformString
+	transform: transformString
+
+
+
+genTransformOriginStyle = (xValue)->
+	webkitTransformOrigin: "#{xValue} 0%"
+	mozTransformOrigin: "#{xValue} 0%"
+	msTransformOrigin: "#{xValue} 0%"
+	oTransformOrigin: "#{xValue} 0%"
+	transformOrigin: "#{xValue} 0%"
+
+
