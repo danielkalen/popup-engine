@@ -138,7 +138,7 @@
     this.appendToDOM();
     return Popup.instances[this.name] = this;
   };
-  Popup.version = '3.0.0';
+  Popup.version = '3.0.1';
   Popup.instances = {};
   Popup.isOpen = false;
   Popup.defaultOptions = defaultOptions = {
