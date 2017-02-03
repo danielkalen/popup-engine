@@ -332,7 +332,7 @@
     $(document.body).wrapInner(markup.bodyWrapper);
     return bodyWrapper$ = $(document.body).children('.bodyInnerwrap');
   });
-  if ((typeof exports !== "undefined" && exports !== null ? exports.module : void 0) != null) {
+  if ((typeof module !== "undefined" && module !== null ? module.exports : void 0) != null) {
     return module.exports = Popup;
   } else if (typeof define === 'function' && define.amd) {
     return define(['Popup'], function() {
