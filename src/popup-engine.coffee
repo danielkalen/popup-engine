@@ -49,7 +49,7 @@ do ($=jQuery)->
 
 
 	
-	if exports?.module?
+	if module?.exports?
 		module.exports = Popup
 	else if typeof define is 'function' and define.amd
 		define ['Popup'], ()-> Popup
