@@ -2,13 +2,17 @@
   "name": "@danielkalen/popup-engine",
   "version": "3.0.1",
   "description": "Popup creation and interaction engine",
-  "main": "src/popup-engine.coffee",
+  "main": "dist/popup-engine.js",
+  "browser": {
+    "./debug": "dist/popup-engine.debug.js",
+    "./src": "src/popup-engine.coffee"
+  },
   "scripts": {
     "postversion": "echo \\'$(json -f package.json version)\\' > .version.coffee && npm run build",
-    "build": "npm run build:pretty && npm run build:ugly",
-    "build:ugly": "simplyimport -i src/popup-engine.coffee | coffee -b -s -c > dist/js/popup-engine.pretty.js && uglifyjs dist/js/popup-engine.pretty.js -m -c keep_fargs,unused=false -o dist/js/popup-engine.js",
-    "build:pretty": "simplyimport -i src/popup-engine.coffee | coffee -b -s -c > dist/js/popup-engine.pretty.js && cp -f dist/js/popup-engine.pretty.js dist/js/popup-engine.js",
-    "watch": "simplywatch -g 'src/*' -x 'npm run build:pretty -s'"
+    "build": "npm run build:debug && npm run build:ugly",
+    "build:ugly": "simplyimport -i src/popup-engine.coffee | coffee -b -s -c > dist/js/popup-engine.debug.js && uglifyjs dist/js/popup-engine.debug.js -m -c keep_fargs,unused=false -o dist/js/popup-engine.js",
+    "build:debug": "simplyimport -i src/popup-engine.coffee | coffee -b -s -c > dist/js/popup-engine.debug.js && cp -f dist/js/popup-engine.debug.js dist/js/popup-engine.js",
+    "watch": "simplywatch -g 'src/*' -x 'npm run build:debug -s'"
   },
   "repository": {
     "type": "git",
