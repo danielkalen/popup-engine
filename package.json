@@ -24,8 +24,9 @@
     "url": "https://github.com/danielkalen/popup-engine.coffee/issues"
   },
   "homepage": "https://github.com/danielkalen/popup-engine.coffee#readme",
-  "peerDependencies": {
-    "jquery": "*"
+  "dependencies": {
+    "quickdom": "^1.0.31",
+    "smart-extend": "^1.5.0"
   },
   "devDependencies": {
     "closure-compiler-service": "^0.6.1",

@@ -1,4 +1,6 @@
 do ($=jQuery)->
+	DOM = import 'quickdom'
+	extend = import 'smart-extend'
 	import _parts/helpers.coffee
 	import _parts/styles.coffee
 	import _parts/markup.coffee
@@ -13,7 +15,7 @@ do ($=jQuery)->
 	Popup = (targetEl, name, options)->
 		targetEl$ = $(targetEl)
 		@name = name ?= genName()
-		@options = $.extend(true, {}, defaultOptions, options)
+		@options = extend.onlyDeep('styles').clone(defaultOptions, options)
 		@eventCallbacks = {}
 		@isOpen = false
 		@scrollOffset = 0
@@ -23,6 +25,8 @@ do ($=jQuery)->
 		@els.overlay = $(markup.overlay).appendTo(@els.popup)
 		@els.close = $(markup.close).appendTo(@els.popup)
 		@els.content = $(markup.content).appendTo(@els.popup)
+		@els.target = targetEl
+		targetEl
 		@els.target = targetEl$.first().appendTo(@els.content)
 
 		@attachEvents()
